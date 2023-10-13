@@ -69,6 +69,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     {
         HandleMovement();
         HandleInteractions();
+        
     }
 
     public bool IsWalking()
@@ -121,12 +122,15 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
         if (!canMove)
         {
+            //cannot move towards moveDir
+
+            //Attempt only x movement
             Vector3 moveDirX = new Vector3(moveDir.x, 0, 0).normalized;
-            canMove = moveDir.x != 0! && Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirX, moveDistance);
+            canMove = moveDir.x != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirX, moveDistance);
 
             if (canMove)
             {
-                moveDir = moveDirX;
+                moveDir = moveDirX;  
             }
             else
             {
@@ -135,10 +139,11 @@ public class Player : MonoBehaviour, IKitchenObjectParent
                 if (canMove)
                 {
                     moveDir = moveDirZ;
+                   
                 }
                 else
                 {
-                  //  return;
+                 
                 }
             }
 
