@@ -12,6 +12,12 @@ public class CuttingCounter : BaseCounter, IHasProgress
 
     public static event EventHandler OnAnyCut;
 
+    new public static void ResetStaticData()
+    {
+        OnAnyCut = null;
+    }
+
+
     //good example of event with eventargs
     public event EventHandler<IHasProgress.OnProgressChangedEventArgs> OnProgressChanged;
  

@@ -12,6 +12,9 @@ public class DeliveryManager : MonoBehaviour
 
     public static DeliveryManager Instance { get; private set; }
 
+
+
+
     [SerializeField] private RecipeListSO recipeListSO;
 
 
