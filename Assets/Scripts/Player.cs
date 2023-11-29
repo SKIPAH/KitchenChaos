@@ -1,13 +1,14 @@
 using System;
 using System.Numerics;
 using UnityEngine;
+using Unity.Netcode;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
-public class Player : MonoBehaviour, IKitchenObjectParent
+public class Player : NetworkBehaviour, IKitchenObjectParent
 {
     
-    public static Player Instance { get; private set; }
+  //  public static Player Instance { get; private set; }
 
 
     public event EventHandler OnPickedSomething;
@@ -18,7 +19,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     }
 
     [SerializeField] private float moveSpeed = 0;
-    [SerializeField] private GameInput gameInput;
+    
     [SerializeField] private LayerMask countersLayerMask;
     [SerializeField] private Transform kitchenObjectHoldPoint;
 
@@ -31,17 +32,14 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
     private void Awake()
     {
-        if(Instance != null)
-        {
-            Debug.LogError("Should only be one player");
-        }
-        Instance = this;
+       
+        //Instance = this;
     }
 
     private void Start()
     {
-        gameInput.OnInteractAction += GameInput_OnInteractAction;
-        gameInput.OnInteractAlternateAction += GameInput_OnInteractAlternateAction;
+        GameInput.Instance.OnInteractAction += GameInput_OnInteractAction;
+        GameInput.Instance.OnInteractAlternateAction += GameInput_OnInteractAlternateAction;
     }
 
     private void GameInput_OnInteractAlternateAction(object sender, EventArgs e)
@@ -67,9 +65,19 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
     private void Update()
     {
+
+        if (!IsOwner)
+        {
+            return;
+        }
+
+
+        //IF DONE SERVER SIDE ONLY 
+        //HandleMovementServerAuth();
         HandleMovement();
         HandleInteractions();
-        
+
+
     }
 
     public bool IsWalking()
@@ -81,7 +89,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     private void HandleInteractions()
     {
 
-        Vector2 inputVector = gameInput.GetMovementVectorNormalized();
+        Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
         Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
 
         if(moveDir != Vector3.zero)
@@ -109,10 +117,76 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         }
     }
 
+    /*
+    private void HandleMovementServerAuth()
+    {
+        Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
+        HandleMovementServerRpc(inputVector);
+
+
+    }
+    [ServerRpc(RequireOwnership = false)]
+    private void HandleMovementServerRpc(Vector2 inputVector)
+    {
+        Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
+
+        float moveDistance = moveSpeed * Time.deltaTime;
+        float playerRadius = .7f;
+        float playerHeight = 2f;
+        bool canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDir, moveDistance);
+
+        if (!canMove)
+        {
+            //cannot move towards moveDir
+
+            //Attempt only x movement
+            Vector3 moveDirX = new Vector3(moveDir.x, 0, 0).normalized;
+            canMove = (moveDir.x < -0.5f || moveDir.x > +0.5f) && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirX, moveDistance);
+
+            if (canMove)
+            {
+                moveDir = moveDirX;
+            }
+            else
+            {
+                Vector3 moveDirZ = new Vector3(0, 0, moveDir.z).normalized;
+                canMove = (moveDir.z < -0.5f || moveDir.z > +0.5f) && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * playerHeight, playerRadius, moveDirZ, moveDistance);
+                if (canMove)
+                {
+                    moveDir = moveDirZ;
+
+                }
+                else
+                {
+
+                }
+            }
+
+        }
+        if (canMove)
+        {
+            transform.position += moveDir * moveDistance;
+        }
+
+        //transform.eulerangles/quaternion/LookAt()
+        //Player animation + rotation + looking direction
+        isWalking = moveDir != Vector3.zero;
+        float rotateSpeed = 10f;
+
+        float minMoveDirMagnitude = 0.01f;
+        if (moveDir.sqrMagnitude > minMoveDirMagnitude)
+        {
+            transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * rotateSpeed);
+        }
+
+
+    }
+
+    */
     private void HandleMovement()
     {
 
-        Vector2 inputVector = gameInput.GetMovementVectorNormalized();
+        Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
         Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
 
         float moveDistance = moveSpeed * Time.deltaTime;
