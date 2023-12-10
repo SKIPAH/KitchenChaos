@@ -250,8 +250,6 @@ public class Player : NetworkBehaviour, IKitchenObjectParent
         {
             transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * rotateSpeed);
         }
-        
-
     }
 
 
