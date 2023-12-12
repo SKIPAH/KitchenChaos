@@ -21,7 +21,7 @@ public class CuttingCounter : BaseCounter, IHasProgress
 
     //good example of event with eventargs
     public event EventHandler<IHasProgress.OnProgressChangedEventArgs> OnProgressChanged;
- 
+
     public event EventHandler OnCut;
 
     public override void Interact(Player player)
@@ -37,14 +37,10 @@ public class CuttingCounter : BaseCounter, IHasProgress
                     KitchenObject kitchenObject = player.GetKitchenObject();
 
                     kitchenObject.SetKitchenObjectParent(this);
-                    cuttingProgress = 0;
 
-                    CuttingRecipeSO cuttingRecipeSO = GetCuttingRecipeSOWithInput(kitchenObject.GetKitchenObjectSO());
+                    InteractLogicPlaceObjectOnCounterServerRpc();
 
-                    OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
-                    {
-                        progressNormalized = (float)cuttingProgress / cuttingRecipeSO.cuttingProgressMax
-                    });
+
                 }
 
             }
@@ -76,6 +72,26 @@ public class CuttingCounter : BaseCounter, IHasProgress
         }
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    private void InteractLogicPlaceObjectOnCounterServerRpc()
+    {
+        InteractLogicPlaceObjectOnCounterClientRpc();
+        
+    }
+    [ClientRpc]
+    private void InteractLogicPlaceObjectOnCounterClientRpc()
+    {
+        cuttingProgress = 0;
+
+        OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
+        {
+            progressNormalized = 0f
+        });
+    }
+
+
+
+
     public override void InteractAlternate(Player player)
     {
         if (HasKitchenObject() && HasRecipeWithInput(GetKitchenObject().GetKitchenObjectSO()))
@@ -83,6 +99,7 @@ public class CuttingCounter : BaseCounter, IHasProgress
             //there is something on that can be cut
 
             CutObjectServerRpc();
+            TestCuttingProgressDoneServerRpc();
         }
     }
 
@@ -105,10 +122,19 @@ public class CuttingCounter : BaseCounter, IHasProgress
             progressNormalized = (float)cuttingProgress / cuttingRecipeSO.cuttingProgressMax
         });
 
+        
+    }
+    [ServerRpc(RequireOwnership = false)]
+    private void TestCuttingProgressDoneServerRpc()
+    {
+        CuttingRecipeSO cuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObject().GetKitchenObjectSO());
+
         if (cuttingProgress >= cuttingRecipeSO.cuttingProgressMax)
         {
             KitchenObjectSO outputKitchenObjectSO = GetOutputForInput(GetKitchenObject().GetKitchenObjectSO());
-            GetKitchenObject().DestroySelf();
+
+            KitchenObject.DestroyKitchenObject(GetKitchenObject());
+
 
             KitchenObject.SpawnKitchenObject(outputKitchenObjectSO, this);
         }

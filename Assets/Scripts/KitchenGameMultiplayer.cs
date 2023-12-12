@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class KitchenGameMultiplayer : NetworkBehaviour
 {
-  
+    [SerializeField] private KitchenObjectListSO kitchenObjectListSO;
     public static KitchenGameMultiplayer Instance { get; private set; }
 
-    [SerializeField] private KitchenObjectListSO kitchenObjectListSO;
+   
 
     private void Awake()
     {
