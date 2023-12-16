@@ -43,7 +43,7 @@ public class DeliveryManager : NetworkBehaviour
         {
             recipeTimerSpawn = recipeTimerSpawnMax;
 
-            if(KitchenGameManager.Instance.isGamePlaying() && waitingRecipeSOList.Count < maxRecipeCount) {
+            if(KitchenGameManager.Instance.IsGamePlaying() && waitingRecipeSOList.Count < maxRecipeCount) {
 
                 int waitingRecipeSOIndex = UnityEngine.Random.Range(0, recipeListSO.recipeSOList.Count);
  
