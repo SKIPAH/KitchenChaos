@@ -14,6 +14,7 @@ public class TestingLobbyUI : MonoBehaviour
         createGameButton.onClick.AddListener(() =>
         {
             KitchenGameMultiplayer.Instance.StartHost();
+            Loader.LoadNetwork(Loader.Scene.CharacterSelectScene);
         });
         joinGameButton.onClick.AddListener(() =>
         {
