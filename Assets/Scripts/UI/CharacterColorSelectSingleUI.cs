@@ -23,6 +23,7 @@ public class CharacterColorSelectSingleUI : MonoBehaviour
         KitchenGameMultiplayer.Instance.OnPlayerDataNetworkListChanged += KitchenGameMultiplayer_OnPlayerDataNetworkListChanged;
         image.color = KitchenGameMultiplayer.Instance.GetPlayerColor(colorId);
         UpdateIsSelected();
+       
     }
 
     private void KitchenGameMultiplayer_OnPlayerDataNetworkListChanged(object sender, System.EventArgs e)

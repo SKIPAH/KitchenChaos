@@ -14,7 +14,7 @@ public class KitchenGameMultiplayer : NetworkBehaviour
 
 
 
-    private const int MAX_PLAYER_AMOUNT = 4;
+    public const int MAX_PLAYER_AMOUNT = 4;
 
     //has to be initialized in Awake function
     private NetworkList<PlayerData> playerDataNetworkList;
