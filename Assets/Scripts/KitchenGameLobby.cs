@@ -13,7 +13,7 @@ public class KitchenGameLobby : MonoBehaviour
 
 
     private Lobby joinedLobby;
-
+    private float heartbeatTimer;
     private void Awake()
     {
 
@@ -43,6 +43,32 @@ public class KitchenGameLobby : MonoBehaviour
        
     }
 
+    private void Update()
+    {
+        HandleHeartbeat();
+    }
+
+    private void HandleHeartbeat()
+    {
+        if (IsLobbyHost())
+        {
+            heartbeatTimer -= Time.deltaTime;
+            if(heartbeatTimer <= 0f)
+            {
+                float heartbeatTimerMax = 15f;
+                heartbeatTimer = heartbeatTimerMax;
+
+                LobbyService.Instance.SendHeartbeatPingAsync(joinedLobby.Id);
+
+            }
+        }
+    }
+
+    private bool IsLobbyHost()
+    {
+        return joinedLobby != null && joinedLobby.HostId == AuthenticationService.Instance.PlayerId;
+    }
+
 
     public async void CreateLobby(string lobbyName, bool isPrivate)
     {
@@ -66,6 +92,34 @@ public class KitchenGameLobby : MonoBehaviour
 
     public async void QuickJoin()
     {
-        await LobbyService.Instance.QuickJoinLobbyAsync();
+        try
+        {
+            joinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
+
+            KitchenGameMultiplayer.Instance.StartClient();
+
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.Log(e);
+        }
+    }
+
+    public async void JoinWithCode(string lobbyCode)
+    {
+        try
+        {
+            joinedLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+            KitchenGameMultiplayer.Instance.StartClient();
+
+        }catch (LobbyServiceException e)
+        {
+            Debug.Log(e);
+        }
+    }
+
+    public Lobby GetLobby()
+    {
+        return joinedLobby;
     }
 }
